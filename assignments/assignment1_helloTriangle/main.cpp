@@ -9,6 +9,7 @@ const int SCREEN_WIDTH = 1080;
 const int SCREEN_HEIGHT = 720;
 
 int main() {
+	float vertices[9]{ -0.5, -0.5, 0.0, 0.5, -0.5, 0.0, 0.0, 0.5, 0.0 };
 	printf("Initializing...");
 	if (!glfwInit()) {
 		printf("GLFW failed to init!");
@@ -26,6 +27,26 @@ int main() {
 		printf("GLAD Failed to load GL headers");
 		return 1;
 	}
+
+	unsigned int vbo;
+	glGenBuffers(1, &vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+	unsigned int vao;
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, (const void*)0);
+	glEnableVertexAttribArray(0);
+
+	const char* vertexShaderSource = R"(
+	#version 450
+	layout(location = 0) in vec3 Pos;
+	void main(){
+		gl_position = vec4(vPos,1.0);
+	}
+	)";
 
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
