@@ -9,7 +9,11 @@ const int SCREEN_WIDTH = 1080;
 const int SCREEN_HEIGHT = 720;
 
 int main() {
-	float vertices[21]{ -0.5, -0.5, 0.0, 1.0, 0.0, 0.0, 1.0, 0.5, -0.5, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.5, 0.0, 0.0, 0.0, 1.0, 1.0 };
+	float vertices[21]{
+		-0.5, -0.5, 0.0, 1.0, 0.0, 0.0, 1.0,
+		 0.5, -0.5, 0.0, 0.0, 1.0, 0.0, 1.0,
+		 0.0,  0.5, 0.0, 0.0, 0.0, 1.0, 1.0
+	};
 	printf("Initializing...");
 	if (!glfwInit()) {
 		printf("GLFW failed to init!");
@@ -37,17 +41,21 @@ int main() {
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 7, (const void*)(sizeof(float) * 7));
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 7, (const void*)0);
 	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 7, (const void*)(sizeof(float) * 3));
+	glEnableVertexAttribArray(1);
 
 	const char* vertexShaderSource = R"(
 	#version 450
 	layout(location = 0) in vec3 vPos;
 	layout(location = 1) in vec4 vColor;
 	out vec4 Color;
+	uniform float _Time;
 	void main(){
 		Color = vColor;
-		gl_position = vec4(vPos,1.0);
+		vec3 offset = vec3(0, sin(vPos.x + _Time), 0) * 0.5;
+		gl_Position = vec4(vPos + offset, 1.0);
 	}
 	)";
 
@@ -55,8 +63,9 @@ int main() {
 	#version 450
 	out vec4 FragColor;
 	in vec4 Color;
+	uniform float _Time;
 	void main(){
-		FragColor = Color;
+		FragColor = Color * abs(sin(_Time));
 	}
 	)";
 
@@ -95,15 +104,19 @@ int main() {
 		printf("Failed to link shader program: %s", infoLog);
 	}
 
-	glDeleteShader(vertexShader);
-	glDeleteShader(fragmentShader);
-
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
 		glClearColor(0.3f, 0.4f, 0.9f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 		glUseProgram(shaderProgram);
 		glBindVertexArray(vao);
+		float cTime = (float)glfwGetTime();
+		int cTimeLocation = glGetUniformLocation(fragmentShader, "_Time");
+		glUniform1f(cTimeLocation, cTime);
+		float vTime = (float)glfwGetTime();
+		int vTimeLocation = glGetUniformLocation(vertexShader, "_Time");
+		glUniform1f(vTimeLocation, vTime);
+
 		glDrawArrays(GL_TRIANGLES, 0, 3);
 
 		glfwSwapBuffers(window);
