@@ -8,8 +8,53 @@
 const int SCREEN_WIDTH = 1080;
 const int SCREEN_HEIGHT = 720;
 
+unsigned int createShader(GLenum shaderType, const char* sourceCode) {
+
+	unsigned int shader;
+	shader = glCreateShader(shaderType);
+	glShaderSource(shader, 1, &sourceCode, NULL);
+	glCompileShader(shader);
+
+	int success;
+	glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+	if (!success) {
+		char infoLog[512];
+		glGetShaderInfoLog(shader, 512, NULL, infoLog);
+		printf("Failed to compile shader: %s", infoLog);
+	}
+
+	return shader;
+}
+
+unsigned int createShaderProgram(const char* vertexShaderSource, const char* fragmentShaderSource) {
+	unsigned int vertexShader = createShader(GL_VERTEX_SHADER, vertexShaderSource);
+	unsigned int fragmentShader = createShader(GL_FRAGMENT_SHADER, fragmentShaderSource);
+
+	unsigned int shaderProgram = glCreateProgram();
+	glAttachShader(shaderProgram, vertexShader);
+	glAttachShader(shaderProgram, fragmentShader);
+	glLinkProgram(shaderProgram);
+
+	int success;
+	glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
+	if (!success) {
+		char infoLog[512];
+		glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
+		printf("Failed to link shader program: %s", infoLog);
+	}
+
+	glDeleteShader(vertexShader);
+	glDeleteShader(fragmentShader);
+
+	return shaderProgram;
+}
+
 int main() {
-	float vertices[21]{ -0.5, -0.5, 0.0, 1.0, 0.0, 0.0, 1.0, 0.5, -0.5, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.5, 0.0, 0.0, 0.0, 1.0, 1.0 };
+	float vertices[21]{
+		-0.5, -0.5, 0.0, 1.0, 0.0, 0.0, 1.0,
+		 0.5, -0.5, 0.0, 0.0, 1.0, 0.0, 1.0,
+		 0.0,  0.5, 0.0, 0.0, 0.0, 1.0, 1.0
+	};
 	printf("Initializing...");
 	if (!glfwInit()) {
 		printf("GLFW failed to init!");
@@ -37,17 +82,21 @@ int main() {
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 7, (const void*)(sizeof(float) * 7));
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 7, (const void*)0);
 	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 7, (const void*)(sizeof(float) * 3));
+	glEnableVertexAttribArray(1);
 
 	const char* vertexShaderSource = R"(
 	#version 450
 	layout(location = 0) in vec3 vPos;
 	layout(location = 1) in vec4 vColor;
 	out vec4 Color;
+	uniform float _Time;
 	void main(){
 		Color = vColor;
-		gl_Position = vec4(vPos,1.0);
+		vec3 offset = vec3(0, sin(vPos.x + _Time), 0) * 0.5;
+		gl_Position = vec4(vPos + offset, 1.0);
 	}
 	)";
 
@@ -55,48 +104,13 @@ int main() {
 	#version 450
 	out vec4 FragColor;
 	in vec4 Color;
+	uniform float _Time;
 	void main(){
-		FragColor = Color;
+		FragColor = Color * abs(sin(_Time));
 	}
 	)";
 
-	unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-	glCompileShader(vertexShader);
-
-	int success;
-	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-	if (!success) {
-		char infoLog[512];
-		glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-		printf("Failed to compile shader: %s", infoLog);
-	}
-
-	unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-	glCompileShader(fragmentShader);
-
-	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-	if (!success) {
-		char infoLog[512];
-		glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-		printf("Failed to compile shader: %s", infoLog);
-	}
-
-	unsigned int shaderProgram = glCreateProgram();
-	glAttachShader(shaderProgram, vertexShader);
-	glAttachShader(shaderProgram, fragmentShader);
-	glLinkProgram(shaderProgram);
-
-	glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-	if (!success) {
-		char infoLog[512];
-		glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
-		printf("Failed to link shader program: %s", infoLog);
-	}
-
-	glDeleteShader(vertexShader);
-	glDeleteShader(fragmentShader);
+	unsigned int shaderProgram = createShaderProgram(vertexShaderSource, fragmentShaderSource);
 
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
@@ -104,6 +118,10 @@ int main() {
 		glClear(GL_COLOR_BUFFER_BIT);
 		glUseProgram(shaderProgram);
 		glBindVertexArray(vao);
+		float time = (float)glfwGetTime();
+		int timeLocation = glGetUniformLocation(shaderProgram, "_Time");
+		glUniform1f(timeLocation, time);
+
 		glDrawArrays(GL_TRIANGLES, 0, 3);
 
 		glfwSwapBuffers(window);
