@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <math.h>
+#include <a-rt/shader.h>
 
 #include <ew/external/glad.h>
 #include <ew/ewMath/ewMath.h>
@@ -23,23 +24,6 @@ float vertices[9] = {
 	 0.0,  0.5, 0.0 
 };
 
-const char* vertexShaderSource = R"(
-	#version 450
-	layout(location = 0) in vec3 vPos;
-	void main(){
-		gl_Position = vec4(vPos,1.0);
-	}
-)";
-
-const char* fragmentShaderSource = R"(
-	#version 450
-	out vec4 FragColor;
-	uniform vec3 _Color;
-	uniform float _Brightness;
-	void main(){
-		FragColor = vec4(_Color * _Brightness,1.0);
-	}
-)";
 
 float triangleColor[3] = { 1.0f, 0.5f, 0.0f };
 float triangleBrightness = 1.0f;
@@ -65,13 +49,16 @@ int main() {
 		return 1;
 	}
 
+	std::string vertexShaderSource = artLib::loadShaderSourceFromFile("assets/vertexShader.vert");
+	std::string fragmentShaderSource = artLib::loadShaderSourceFromFile("assets/fragmentShader.frag");
+	unsigned int shader = createShaderProgram(vertexShaderSource.c_str(), fragmentShaderSource.c_str());
+
 	//Initialize ImGUI
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init();
 
-	unsigned int shader = createShaderProgram(vertexShaderSource, fragmentShaderSource);
 	unsigned int vao = createVAO(vertices, 3);
 
 	glUseProgram(shader);
@@ -115,7 +102,8 @@ int main() {
 
 unsigned int createShader(GLenum shaderType, const char* sourceCode) {
 	//Create a new vertex shader object
-	unsigned int shader = glCreateShader(shaderType);
+	unsigned int shader;
+	shader = glCreateShader(shaderType);
 	//Supply the shader object with source code
 	glShaderSource(shader, 1, &sourceCode, NULL);
 	//Compile the shader object
