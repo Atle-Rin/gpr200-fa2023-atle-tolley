@@ -1,3 +1,4 @@
+#include "C:\Users\bento\Documents\Graphics Projects\gpr200-fa2023-atle-tolley\core\ew\external\glad.h"
 #include "shader.h"
 
 namespace artLib {
@@ -68,13 +69,13 @@ namespace artLib {
 	void Shader::setFloat(const std::string& name, float v) const{
 		glUniform1f(glGetUniformLocation(m_id, name.c_str()), v);
 	}
-	void setVec2(const std::string& name, float x, float y) const {
+	void Shader::setVec2(const std::string& name, float x, float y) const{
 		glUniform2f(glGetUniformLocation(m_id, name.c_str()), x, y);
 	}
-	void setVec3(const std::string& name, float x, float y, float z) const {
+	void Shader::setVec3(const std::string& name, float x, float y, float z) const{
 		glUniform3f(glGetUniformLocation(m_id, name.c_str()), x, y, z);
 	}
-	void setVec4(const std::string& name, float x, float y, float z, float w) const {
+	void Shader::setVec4(const std::string& name, float x, float y, float z, float w) const{
 		glUniform4f(glGetUniformLocation(m_id, name.c_str()), x, y, z, w);
 	}
 }

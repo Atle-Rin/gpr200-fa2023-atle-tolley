@@ -17,11 +17,14 @@ void framebufferSizeCallback(GLFWwindow* window, int width, int height);
 const int SCREEN_WIDTH = 1080;
 const int SCREEN_HEIGHT = 720;
 
-float vertices[9] = {
+float vertices[18] = {
 	//x   //y  //z   
-	-0.5, -0.5, 0.0, 
+	-0.5, -0.5, 0.0,
 	 0.5, -0.5, 0.0,
-	 0.0,  0.5, 0.0 
+	-0.5,  0.5, 0.0,
+	 0.5, -0.5, 0.0,
+	 0.5,  0.5, 0.0,
+	-0.5,  0.5, 0.0
 };
 
 
@@ -49,7 +52,11 @@ int main() {
 		return 1;
 	}
 
+	float vec2[2]{ 1.0f, 0.0f };
 	artLib::Shader shader("assets/vertexShader.vert", "assets/fragmentShader.frag");
+	shader.use();
+	shader.setFloat("_MyFloat", 0.5f);
+	shader.setVec2("_MyVec2", vec2[0], vec2[1]);
 
 	//Initialize ImGUI
 	IMGUI_CHECKVERSION();
@@ -59,7 +66,6 @@ int main() {
 
 	unsigned int vao = createVAO(vertices, 3);
 
-	shader.use();
 	glBindVertexArray(vao);
 
 	while (!glfwWindowShouldClose(window)) {
@@ -68,8 +74,8 @@ int main() {
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		//Set uniforms
-		glUniform3f(glGetUniformLocation(shader, "_Color"), triangleColor[0], triangleColor[1], triangleColor[2]);
-		glUniform1f(glGetUniformLocation(shader,"_Brightness"), triangleBrightness);
+		glUniform3f(glGetUniformLocation(shader.getMID(), "_Color"), triangleColor[0], triangleColor[1], triangleColor[2]);
+		glUniform1f(glGetUniformLocation(shader.getMID(), "_Brightness"), triangleBrightness);
 
 		glDrawArrays(GL_TRIANGLES, 0, 3);
 
