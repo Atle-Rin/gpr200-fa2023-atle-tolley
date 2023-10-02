@@ -81,6 +81,8 @@ int main() {
 		//Set uniforms
 		glUniform3f(glGetUniformLocation(shader.getMID(), "_Color"), triangleColor[0], triangleColor[1], triangleColor[2]);
 		glUniform1f(glGetUniformLocation(shader.getMID(), "_Brightness"), triangleBrightness);
+		glUniform1f(glGetUniformLocation(shader.getMID(), "_Time"), (float)glfwGetTime());
+		glUniform2i(glGetUniformLocation(shader.getMID(), "_Resolution"), 1920, 1080);
 
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL);
 
