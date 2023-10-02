@@ -24,10 +24,10 @@ const int SCREEN_HEIGHT = 720;
 
 Vertex vertexes[4] = {
 	//x   //y  //z  //u  //v
-	{-0.5, -0.5, 0.0, 0.0, 0.0},
-	{ 0.5, -0.5, 0.0, 1.0, 0.0},
-	{-0.5,  0.5, 0.0, 0.0, 1.0},
-	{ 0.5,  0.5, 0.0, 1.0, 1.0},
+	{-0.75, -0.75, 0.0, 0.0, 0.0},
+	{ 0.75, -0.75, 0.0, 1.0, 0.0},
+	{-0.75,  0.75, 0.0, 0.0, 1.0},
+	{ 0.75,  0.75, 0.0, 1.0, 1.0},
 };
 
 unsigned int indices[6] = {
@@ -36,9 +36,13 @@ unsigned int indices[6] = {
 };
 
 
-float triangleColor[3] = { 1.0f, 0.5f, 0.0f };
+float sunColor[4] = { 1.0f, 0.5f, 0.0f, 1.0f };
 float triangleBrightness = 1.0f;
 bool showImGUIDemoWindow = true;
+float screenRes[2] = { 1.0f, 1.0f };
+float topColor[3] = { 1.0, 0.0, 0.2 };
+float botColor[3] = { 1.0, 0.5, 0.0 };
+float sunDef[2] = { -0.3, 0.3 };
 
 int main() {
 	printf("Initializing...");
@@ -79,10 +83,13 @@ int main() {
 		shader.use();
 
 		//Set uniforms
-		glUniform3f(glGetUniformLocation(shader.getMID(), "_Color"), triangleColor[0], triangleColor[1], triangleColor[2]);
 		glUniform1f(glGetUniformLocation(shader.getMID(), "_Brightness"), triangleBrightness);
 		glUniform1f(glGetUniformLocation(shader.getMID(), "_Time"), (float)glfwGetTime());
-		glUniform2i(glGetUniformLocation(shader.getMID(), "_Resolution"), 1920, 1080);
+		glUniform2f(glGetUniformLocation(shader.getMID(), "_Resolution"), screenRes[0], screenRes[1]);
+		glUniform4f(glGetUniformLocation(shader.getMID(), "_SunColor"), sunColor[0], sunColor[1], sunColor[2], sunColor[3]);
+		glUniform3f(glGetUniformLocation(shader.getMID(), "_BGColor1"), topColor[0], topColor[1], topColor[2]);
+		glUniform3f(glGetUniformLocation(shader.getMID(), "_BGColor2"), botColor[0], botColor[1], botColor[2]);
+		glUniform2f(glGetUniformLocation(shader.getMID(), "_SunDef"), sunDef[0], sunDef[1]);
 
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL);
 
@@ -94,8 +101,11 @@ int main() {
 
 			ImGui::Begin("Settings");
 			ImGui::Checkbox("Show Demo Window", &showImGUIDemoWindow);
-			ImGui::ColorEdit3("Color", triangleColor);
 			ImGui::SliderFloat("Brightness", &triangleBrightness, 0.0f, 1.0f);
+			ImGui::ColorEdit4("Sun Color", sunColor);
+			ImGui::ColorEdit3("BG Top Color", topColor);
+			ImGui::ColorEdit3("BG Bottom Color", botColor);
+			ImGui::DragFloat2("Sun Definition", sunDef);
 			ImGui::End();
 			if (showImGUIDemoWindow) {
 				ImGui::ShowDemoWindow(&showImGUIDemoWindow);
