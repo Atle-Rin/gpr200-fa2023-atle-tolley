@@ -9,6 +9,7 @@
 #include <imgui_impl_opengl3.h>
 
 #include <ew/shader.h>
+#include <a-rt/texture.h>
 
 struct Vertex {
 	float x, y, z;
@@ -63,6 +64,12 @@ int main() {
 	unsigned int quadVAO = createVAO(vertices, 4, indices, 6);
 
 	glBindVertexArray(quadVAO);
+
+	unsigned int flagTexture = loadTexture("assets/flag.png", GL_REPEAT, GL_LINEAR);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, flagTexture);
+
 
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
