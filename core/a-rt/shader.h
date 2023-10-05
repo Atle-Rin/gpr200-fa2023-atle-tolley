@@ -1,5 +1,5 @@
 #pragma once
-#include "C:\Users\bento\Documents\Graphics Projects\gpr200-fa2023-atle-tolley\core\ew\external\glad.h"
+#include "gpr200-fa2023-atle-tolley\core\ew\external\glad.h"
 #include <sstream>
 #include <fstream>
 namespace artLib {
