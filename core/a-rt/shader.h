@@ -1,5 +1,5 @@
 #pragma once
-#include "gpr200-fa2023-atle-tolley\core\ew\external\glad.h"
+#include "C:\Users\atle.tolley\GPR-200 Repo\gpr200-fa2023-atle-tolley\core\ew\external\glad.h"
 #include <sstream>
 #include <fstream>
 namespace artLib {
