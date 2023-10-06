@@ -59,17 +59,15 @@ int main() {
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init();
 
-	ew::Shader shader("assets/vertexShader.vert", "assets/fragmentShader.frag");
+	ew::Shader bgShader("assets/background.vert", "assets/background.frag");
+	ew::Shader characterShader("assets/character.vert", "assets/character.frag");
 
 	unsigned int quadVAO = createVAO(vertices, 4, indices, 6);
 
 	glBindVertexArray(quadVAO);
 
 	unsigned int flagTexture = loadTexture("assets/flag.png", GL_REPEAT, GL_LINEAR);
-
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, flagTexture);
-
+	unsigned int character = loadTexture("assets/spider.png", GL_CLAMP_TO_EDGE, GL_LINEAR);
 
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
@@ -77,7 +75,9 @@ int main() {
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		//Set uniforms
-		shader.use();
+		bgShader.use();
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, flagTexture);
 
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, NULL);
 
