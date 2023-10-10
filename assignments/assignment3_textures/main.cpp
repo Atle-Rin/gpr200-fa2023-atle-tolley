@@ -67,7 +67,8 @@ int main() {
 	glBindVertexArray(quadVAO);
 
 	unsigned int flagTexture = loadTexture("assets/flag.png", GL_REPEAT, GL_LINEAR);
-	unsigned int character = loadTexture("assets/spider.png", GL_CLAMP_TO_EDGE, GL_LINEAR);
+	unsigned int character = loadTexture("assets/character.png", GL_CLAMP_TO_EDGE, GL_NEAREST);
+	unsigned int noise = loadTexture("assets/noise.png", GL_REPEAT, GL_LINEAR);
 
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
@@ -78,6 +79,19 @@ int main() {
 		bgShader.use();
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, flagTexture);
+
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, noise);
+
+		bgShader.setInt("_Texture", 0);
+		bgShader.setInt("_Noise", 1);
+
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, NULL);
+
+		characterShader.use();
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, character);
+		characterShader.setInt("_Texture", 0);
 
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, NULL);
 
