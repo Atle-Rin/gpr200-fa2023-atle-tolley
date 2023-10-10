@@ -70,6 +70,8 @@ int main() {
 	unsigned int character = loadTexture("assets/character.png", GL_CLAMP_TO_EDGE, GL_NEAREST);
 	unsigned int noise = loadTexture("assets/noise.png", GL_REPEAT, GL_LINEAR);
 
+	glEnable(GL_BLEND);
+
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
 		glClearColor(0.3f, 0.4f, 0.9f, 1.0f);
@@ -85,15 +87,22 @@ int main() {
 
 		bgShader.setInt("_Texture", 0);
 		bgShader.setInt("_Noise", 1);
+		bgShader.setVec2("_Resolution", 1.0f, 1.0f);
+		bgShader.setFloat("_Time", (float)glfwGetTime());
 
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, NULL);
 
 		characterShader.use();
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, character);
+
 		characterShader.setInt("_Texture", 0);
+		characterShader.setVec2("_Resolution", 1.0f, 1.0f);
+		characterShader.setFloat("_cVTime", (float)glfwGetTime());
 
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, NULL);
+
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		//Render UI
 		{
