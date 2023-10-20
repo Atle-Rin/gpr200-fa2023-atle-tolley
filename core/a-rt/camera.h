@@ -17,7 +17,7 @@ namespace artLib {
 		}
 		ew::Mat4 ProjectionMatrix() { //View->Clip
 			if (orthographic) {
-				artLib::Orthographic(position.y, aspectRatio, nearPlane, farPlane);
+				artLib::Orthographic(orthoSize, aspectRatio, nearPlane, farPlane);
 			}
 			else {
 				artLib::Perspective(fov, aspectRatio, nearPlane, farPlane);
