@@ -68,7 +68,7 @@ namespace artLib {
 		ew::Vec3 rotation = ew::Vec3(0.0f, 0.0f, 0.0f); //Euler angles (degrees)
 		ew::Vec3 scale = ew::Vec3(1.0f, 1.0f, 1.0f);
 		ew::Mat4 getModelMatrix() const {
-			return Scale(scale);
+			return artLib::Scale(scale);
 		}
 	};
 	inline ew::Mat4 LookAt(ew::Vec3 eye, ew::Vec3 target, ew::Vec3 up) {
@@ -91,9 +91,14 @@ namespace artLib {
 		ew::Vec4 second(0.0f, (2 / (top - bottom)), 0.0f, (-1 * (top + bottom) / (top - bottom)));
 		ew::Vec4 third(0.0f, 0.0f, (2 / (far - near)), (-1 * (far + near) / (far - near)));
 		ew::Mat4 projection(first, second, third, (ew::Vec4)(0.0f, 0.0f, 0.0f, 1.0f));
+		return projection;
 	};
 	inline ew::Mat4 Perspective(float fov, float aspect, float near, float far) {
-		
+		ew::Vec4 first((1 / (tan(fov / 2) * aspect)), 0.0f, 0.0f, 0.0f);
+		ew::Vec4 second(0.0f, (1 / (tan(fov / 2))), 0.0f, 0.0f);
+		ew::Vec4 third(0.0f, 0.0f, ((near + far) / (near - far)), ((2 * near * far) / (near - far)));
+		ew::Mat4 projection(first, second, third, (ew::Vec4)(0.0f, 0.0f, -1.0f, 0.0f));
+		return projection;
 	};
 	
 }

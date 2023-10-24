@@ -11,6 +11,7 @@
 #include <ew/shader.h>
 #include <ew/procGen.h>
 #include <ew/transform.h>
+#include <a-rt/camera.h>
 
 void framebufferSizeCallback(GLFWwindow* window, int width, int height);
 
@@ -20,6 +21,13 @@ const int SCREEN_HEIGHT = 720;
 
 const int NUM_CUBES = 4;
 ew::Transform cubeTransforms[NUM_CUBES];
+float camPos[3]{ 0.0f, 0.0f, 5.0f };
+float camTarget[3]{ 0.0f, 0.0f, 0.0f };
+float camFOV = 60.0f;
+float camOrthSize = 6.0f;
+bool camProject = true;
+float camNear = 0.1f;
+float camFar = 100.0f;
 
 int main() {
 	printf("Initializing...");
@@ -55,6 +63,7 @@ int main() {
 	glEnable(GL_DEPTH_TEST);
 
 	ew::Shader shader("assets/vertexShader.vert", "assets/fragmentShader.frag");
+	artLib::Camera cam;
 	
 	//Cube mesh
 	ew::Mesh cubeMesh(ew::createCube(0.5f));
@@ -74,7 +83,17 @@ int main() {
 
 		//Set uniforms
 		shader.use();
+		cam.position = (ew::Vec3)(camPos[0], camPos[1], camPos[2]);
+		cam.target = (ew::Vec3)(camTarget[0], camTarget[1], camTarget[2]);
+		cam.fov = camFOV;
+		cam.aspectRatio = (SCREEN_WIDTH / SCREEN_HEIGHT);
+		cam.orthoSize = camOrthSize;
+		cam.nearPlane = camNear;
+		cam.farPlane = camFar;
+		cam.orthographic = camProject;
 
+		shader.setMat4("_View", cam.ViewMatrix());
+		shader.setMat4("_Projection", cam.ProjectionMatrix());
 		//TODO: Set model matrix uniform
 		for (size_t i = 0; i < NUM_CUBES; i++)
 		{
@@ -102,6 +121,13 @@ int main() {
 				ImGui::PopID();
 			}
 			ImGui::Text("Camera");
+			ImGui::DragFloat3("CamPos", camPos);
+			ImGui::DragFloat3("CamTarget", camTarget);
+			ImGui::Checkbox("CamProjection", &camProject);
+			ImGui::DragFloat("CamFOV", &camFOV);
+			ImGui::DragFloat("OrthoSize", &camOrthSize);
+			ImGui::DragFloat("CamNear", &camNear);
+			ImGui::DragFloat("CamFar", &camFar);
 			ImGui::End();
 			
 			ImGui::Render();
@@ -117,4 +143,3 @@ void framebufferSizeCallback(GLFWwindow* window, int width, int height)
 {
 	glViewport(0, 0, width, height);
 }
-

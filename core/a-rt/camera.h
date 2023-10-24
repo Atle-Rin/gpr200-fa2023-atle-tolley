@@ -13,15 +13,18 @@ namespace artLib {
 		bool orthographic; //Perspective or orthographic?
 		float orthoSize; //Height of orthographic frustum
 		ew::Mat4 ViewMatrix() { //World->View
-			artLib::LookAt(position, target, ew::Vec3(0.0f, 1.0f, 0.0f));
+			ew::Mat4 out = artLib::LookAt(position, target, ew::Vec3(0.0f, 1.0f, 0.0f));
+			return out;
 		}
 		ew::Mat4 ProjectionMatrix() { //View->Clip
+			ew::Mat4 out;
 			if (orthographic) {
-				artLib::Orthographic(orthoSize, aspectRatio, nearPlane, farPlane);
+				out = artLib::Orthographic(orthoSize, aspectRatio, nearPlane, farPlane);
 			}
 			else {
-				artLib::Perspective(fov, aspectRatio, nearPlane, farPlane);
+				out = artLib::Perspective(fov, aspectRatio, nearPlane, farPlane);
 			}
+			return out;
 		}
-	}
+	};
 }
