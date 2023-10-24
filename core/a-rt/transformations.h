@@ -74,10 +74,8 @@ namespace artLib {
 	inline ew::Mat4 LookAt(ew::Vec3 eye, ew::Vec3 target, ew::Vec3 up) {
 		ew::Vec3 camDir = ew::Normalize(eye - target);
 		ew::Vec3 camRight = ew::Normalize(ew::Cross(up, camDir));
-		ew::Vec3 camUp = ew::Cross(camDir, camRight);
-		ew::Mat4 multiplier((ew::Vec4)(camRight, 0.0f), (ew::Vec4)(camUp, 0.0f), (ew::Vec4)(camDir, 0.0f), (ew::Vec4)(0.0f, 0.0f, 0.0f, 1.0f));
-		ew::Mat4 multiSecond((ew::Vec4)(1.0f, 0.0f, 0.0f, -1 * (eye.x)), (ew::Vec4)(0.0f, 1.0f, 0.0f, -1 * (eye.y)), (ew::Vec4)(0.0f, 0.0f, 1.0f, -1 * (eye.z)), (ew::Vec4)(0.0f, 0.0f, 0.0f, 1.0f));
-		ew::Mat4 camFinal = multiplier * multiSecond;
+		ew::Vec3 camUp = ew::Normalize(ew::Cross(camDir, camRight));
+		ew::Mat4 camFinal((ew::Vec4)(camRight, (-1 * ew::Dot(camRight, eye))), (ew::Vec4)(camUp, (-1 * ew::Dot(camUp, eye))), (ew::Vec4)(camDir, (-1 * ew::Dot(camDir, eye))), (ew::Vec4)(0.0f, 0.0f, 0.0f, 1.0f));
 		return camFinal;
 			//use ew::Cross for cross product!
 	};

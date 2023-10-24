@@ -92,9 +92,9 @@ int main() {
 		cam.farPlane = camFar;
 		cam.orthographic = camProject;
 
+		//TODO: Set model matrix uniform
 		shader.setMat4("_View", cam.ViewMatrix());
 		shader.setMat4("_Projection", cam.ProjectionMatrix());
-		//TODO: Set model matrix uniform
 		for (size_t i = 0; i < NUM_CUBES; i++)
 		{
 			//Construct model matrix
