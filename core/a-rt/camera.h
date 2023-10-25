@@ -4,6 +4,8 @@
 #include "transformations.h"
 namespace artLib {
 	struct Camera {
+		Camera() {};
+		~Camera() {};
 		ew::Vec3 position; //Camera body position
 		ew::Vec3 target; //Position to look at
 		float fov; //Vertical field of view in degrees
