@@ -72,12 +72,12 @@ namespace artLib {
 		}
 	};
 	inline ew::Mat4 LookAt(ew::Vec3 eye, ew::Vec3 target, ew::Vec3 up) {
-		ew::Vec3 camDir = eye - target;
-		ew::Vec3 camFor = -1 * ew::Normalize(camDir);
-		ew::Vec3 camRight = ew::Cross(camDir, up);
+		ew::Vec3 camDir = ew::Normalize(eye - target);
+		ew::Vec3 camRight = ew::Cross(up, camDir);
 		camRight = ew::Normalize(camRight);
-		ew::Vec3 camUp = ew::Cross(camFor, camRight);
-		ew::Mat4 camFinal((ew::Vec4)(camRight, (-1 * ew::Dot(camRight, eye))), (ew::Vec4)(camUp, (-1 * ew::Dot(camUp, eye))), (ew::Vec4)(camFor, (-1 * ew::Dot(camFor, eye))), (ew::Vec4)(0.0f, 0.0f, 0.0f, 1.0f));
+		ew::Vec3 camUp = ew::Cross(camDir, camRight);
+		ew::Vec3 camTransform((-1 * ew::Dot(camRight, eye)), (-1 * ew::Dot(camUp, eye)), (-1 * ew::Dot(camDir, eye)));
+		ew::Mat4 camFinal((ew::Vec4)(camRight.x, camUp.x, camDir.x, 0.0f), (ew::Vec4)(camRight.y, camUp.y, camDir.y, 0.0f), (ew::Vec4)(camRight.z, camUp.z, camDir.z, 0.0f), (ew::Vec4)(camTransform, 1.0f));
 		return camFinal;
 			//use ew::Cross for cross product!
 	};
@@ -90,7 +90,7 @@ namespace artLib {
 		ew::Vec4 first((2 / (right - left)), 0.0f, 0.0f, (-1 * (right + left) / (right - left)));
 		ew::Vec4 second(0.0f, (2 / (top - bottom)), 0.0f, (-1 * (top + bottom) / (top - bottom)));
 		ew::Vec4 third(0.0f, 0.0f, (2 / (far - near)), (-1 * (far + near) / (far - near)));
-		ew::Mat4 projection(first, second, third, (ew::Vec4)(0.0f, 0.0f, 0.0f, 1.0f));
+		ew::Mat4 projection((ew::Vec4)(first.x, second.x, third.x, 0.0f), (ew::Vec4)(first.y, second.y, third.y, 0.0f), (ew::Vec4)(first.z, second.z, third.z, 0.0f), (ew::Vec4)(first.w, second.w, third.w, 1.0f));
 		return projection;
 	};
 	inline ew::Mat4 Perspective(float fov, float aspect, float near, float far) {
@@ -98,7 +98,7 @@ namespace artLib {
 		ew::Vec4 first((d / aspect), 0.0f, 0.0f, 0.0f);
 		ew::Vec4 second(0.0f, d, 0.0f, 0.0f);
 		ew::Vec4 third(0.0f, 0.0f, ((near + far) / (near - far)), ((2 * near * far) / (near - far)));
-		ew::Mat4 projection(first, second, third, (ew::Vec4)(0.0f, 0.0f, -1.0f, 0.0f));
+		ew::Mat4 projection((ew::Vec4)(first.x, second.x, third.x, 0.0f), (ew::Vec4)(first.y, second.y, third.y, 0.0f), (ew::Vec4)(first.z, second.z, third.z, -1.0f), (ew::Vec4)(first.w, second.w, third.w, 0.0f));
 		return projection;
 	};
 	
