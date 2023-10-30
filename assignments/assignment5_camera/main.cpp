@@ -9,6 +9,7 @@
 #include <imgui_impl_opengl3.h>
 
 #include <ew/shader.h>
+#include <ew/ewMath/vec3.h>
 #include <ew/procGen.h>
 #include <ew/transform.h>
 #include <a-rt/camera.h>
@@ -93,6 +94,23 @@ int main() {
 		cam.orthographic = camProject;
 		ew::Mat4 view = cam.ViewMatrix();
 		ew::Mat4 projection = cam.ProjectionMatrix();
+		float posMag = ew::Magnitude(cam.position - cam.target);
+		float targetMag = ew::Magnitude(ew::Cross((ew::Vec3)(0, 1, 0), ((cam.position - cam.target) / posMag)));
+		shader.setVec3("_Position", camPos[0], camPos[1], camPos[2]);
+		shader.setVec3("_Target", camTarget[0], camTarget[1], camTarget[2]);
+		shader.setFloat("_FirstMag", posMag);
+		shader.setFloat("_SecondMag", targetMag);
+		shader.setFloat("_FOV", camFOV);
+		shader.setFloat("_Aspect", cam.aspectRatio);
+		shader.setFloat("_Ortho", camOrthSize);
+		shader.setFloat("_Near", camNear);
+		shader.setFloat("_Far", camFar);
+		if (camProject) {
+			shader.setInt("_Project", 1);
+		}
+		else {
+			shader.setInt("_Project", 0);
+		}
 
 		//TODO: Set model matrix uniform
 		shader.setMat4("_View", view);
