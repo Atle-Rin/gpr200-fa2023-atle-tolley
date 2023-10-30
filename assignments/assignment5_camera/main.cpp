@@ -83,10 +83,10 @@ int main() {
 
 		//Set uniforms
 		shader.use();
-		cam.position = (ew::Vec3)(camPos[0], camPos[1], camPos[2]);
-		cam.target = (ew::Vec3)(camTarget[0], camTarget[1], camTarget[2]);
+		cam.position = ew::Vec3(camPos[0], camPos[1], camPos[2]);
+		cam.target = ew::Vec3(camTarget[0], camTarget[1], camTarget[2]);
 		cam.fov = camFOV;
-		cam.aspectRatio = (SCREEN_WIDTH / SCREEN_HEIGHT);
+		cam.aspectRatio = ((float)SCREEN_WIDTH / SCREEN_HEIGHT);
 		cam.orthoSize = camOrthSize;
 		cam.nearPlane = camNear;
 		cam.farPlane = camFar;
