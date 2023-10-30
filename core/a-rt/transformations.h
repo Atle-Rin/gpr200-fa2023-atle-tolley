@@ -87,18 +87,19 @@ namespace artLib {
 		bottom = -1 * top;
 		right = (height * aspect)/2;
 		left = -1 * right;
-		ew::Vec4 first((2 / (right - left)), 0.0f, 0.0f, (-1 * (right + left) / (right - left)));
-		ew::Vec4 second(0.0f, (2 / (top - bottom)), 0.0f, (-1 * (top + bottom) / (top - bottom)));
-		ew::Vec4 third(0.0f, 0.0f, (2 / (far - near)), (-1 * (far + near) / (far - near)));
-		ew::Mat4 projection((ew::Vec4)(first.x, second.x, third.x, 0.0f), (ew::Vec4)(first.y, second.y, third.y, 0.0f), (ew::Vec4)(first.z, second.z, third.z, 0.0f), (ew::Vec4)(first.w, second.w, third.w, 1.0f));
+		ew::Vec4 first = ew::Vec4((2 / (right - left)), 0, 0, (-1 * (right + left) / (right - left)));
+		ew::Vec4 second = ew::Vec4(0, (2 / (top - bottom)), 0, (-1 * (top + bottom) / (top - bottom)));
+		ew::Vec4 third = ew::Vec4(0, 0, (2 / (far - near)), (-1 * (far + near) / (far - near)));
+		ew::Mat4 projection = ew::Mat4(first, second, third, ew::Vec4(0, 0, 0, 1));
 		return projection;
 	};
 	inline ew::Mat4 Perspective(float fov, float aspect, float near, float far) {
-		float d = 1/(tan(fov / 2));
+		float fovRad = 180 * fov / 3.1415926535;
+		float d = 1/(tan(fovRad / 2));
 		ew::Vec4 first((d / aspect), 0.0f, 0.0f, 0.0f);
 		ew::Vec4 second(0.0f, d, 0.0f, 0.0f);
 		ew::Vec4 third(0.0f, 0.0f, ((near + far) / (near - far)), ((2 * near * far) / (near - far)));
-		ew::Mat4 projection((ew::Vec4)(first.x, second.x, third.x, 0.0f), (ew::Vec4)(first.y, second.y, third.y, 0.0f), (ew::Vec4)(first.z, second.z, third.z, -1.0f), (ew::Vec4)(first.w, second.w, third.w, 0.0f));
+		ew::Mat4 projection = ew::Mat4(first, second, third, ew::Vec4(0, 0, -1, 0));
 		return projection;
 	};
 	

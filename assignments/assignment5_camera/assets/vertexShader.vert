@@ -34,13 +34,14 @@ void main(){
 		projection = mat4(first, second, third, vec4(0, 0, 0, 1));
 	}
 	else {
-		float d = (tan(_FOV / 2));
+		float fovRad = 180 * _FOV / 3.1415926535;
+		float d = tan(fovRad / 2);
 		vec4 first = vec4((1 / (d * _Aspect)), 0, 0, 0);
 		vec4 second = vec4(0, (1 / d), 0, 0);
 		vec4 third = vec4(0, 0, ((_Near + _Far) / (_Near - _Far)), ((2 * _Near * _Far) / (_Near - _Far)));
 		projection = mat4(first, second, third, vec4(0, 0, -1, 0));
 	}
-	position = projection * position;
+	position = _Projection * position;
 	
 	gl_Position = position;
 }

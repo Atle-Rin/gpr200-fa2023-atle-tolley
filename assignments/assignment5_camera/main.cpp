@@ -65,6 +65,7 @@ int main() {
 
 	ew::Shader shader("assets/vertexShader.vert", "assets/fragmentShader.frag");
 	artLib::Camera cam;
+	artLib::CameraControls camCon;
 	
 	//Cube mesh
 	ew::Mesh cubeMesh(ew::createCube(0.5f));
@@ -78,6 +79,7 @@ int main() {
 
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
+		moveCamera(window, &cam, &camCon);
 		glClearColor(0.3f, 0.4f, 0.9f, 1.0f);
 		//Clear both color buffer AND depth buffer
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -162,4 +164,8 @@ int main() {
 void framebufferSizeCallback(GLFWwindow* window, int width, int height)
 {
 	glViewport(0, 0, width, height);
+}
+
+void moveCamera(GLFWwindow* window, artLib::Camera* camera, artLib::CameraControls* controls) {
+
 }
