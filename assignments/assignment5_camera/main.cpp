@@ -91,10 +91,12 @@ int main() {
 		cam.nearPlane = camNear;
 		cam.farPlane = camFar;
 		cam.orthographic = camProject;
+		ew::Mat4 view = cam.ViewMatrix();
+		ew::Mat4 projection = cam.ProjectionMatrix();
 
 		//TODO: Set model matrix uniform
-		shader.setMat4("_View", cam.ViewMatrix());
-		shader.setMat4("_Projection", cam.ProjectionMatrix());
+		shader.setMat4("_View", view);
+		shader.setMat4("_Projection", projection);
 		for (size_t i = 0; i < NUM_CUBES; i++)
 		{
 			//Construct model matrix
