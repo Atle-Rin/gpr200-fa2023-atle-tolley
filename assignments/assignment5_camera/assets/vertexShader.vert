@@ -9,15 +9,8 @@ uniform mat4 _Projection;
 
 void main(){
 	Normal = vNormal;
-	/*
-		float mag = Magnitude(v);
-		if (mag == 0)
-			return v;
-		return v / mag;
-	*/
-	mat4 projection;
-	vec4 position = _View * _Model * vec4(vPos, 1.0);
-	position = _Projection * position;
+	mat4 transformation = _Projection * _View * _Model;
+	vec4 position = transformation * vec4(vPos, 1.0);
 	
 	gl_Position = position;
 }

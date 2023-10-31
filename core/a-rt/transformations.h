@@ -76,6 +76,7 @@ namespace artLib {
 		ew::Vec3 camRight = ew::Cross(up, camDir);
 		camRight = ew::Normalize(camRight);
 		ew::Vec3 camUp = ew::Cross(camDir, camRight);
+		camUp = ew::Normalize(camUp);
 		ew::Vec3 camTransform((-1 * ew::Dot(camRight, eye)), (-1 * ew::Dot(camUp, eye)), (-1 * ew::Dot(camDir, eye)));
 		ew::Mat4 camFinal(camRight.x, camUp.x, camDir.x, 0.0f, camRight.y, camUp.y, camDir.y, 0.0f, camRight.z, camUp.z, camDir.z, 0.0f, camTransform.x, camTransform.y, camTransform.z, 1.0f);
 		return camFinal;
