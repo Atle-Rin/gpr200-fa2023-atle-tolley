@@ -22,13 +22,59 @@ const int SCREEN_HEIGHT = 720;
 
 const int NUM_CUBES = 4;
 ew::Transform cubeTransforms[NUM_CUBES];
-float camPos[3]{ 0.0f, 0.0f, 5.0f };
+float camPos[3]{ 0.0f, 0.0f, -0.5f };
 float camTarget[3]{ 0.0f, 0.0f, 0.0f };
 float camFOV = 60.0f;
 float camOrthSize = 6.0f;
 bool camProject = true;
 float camNear = 0.1f;
 float camFar = 100.0f;
+
+void moveCamera(GLFWwindow* window, artLib::Camera* camera, artLib::CameraControls* controls) {
+	if (!glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_2)) {
+		//Release cursor
+		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+		controls->firstMouse = true;
+		return;
+	}
+	//GLFW_CURSOR_DISABLED hides the cursor, but the position will still be changed as we move our mouse.
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+	//Get screen mouse position this frame
+	double mouseX, mouseY;
+	glfwGetCursorPos(window, &mouseX, &mouseY);
+
+	//If we just started right clicking, set prevMouse values to current position.
+	//This prevents a bug where the camera moves as soon as we click.
+	if (controls->firstMouse) {
+		controls->firstMouse = false;
+		controls->prevMouseX = mouseX;
+		controls->prevMouseY = mouseY;
+	}
+	double xChange, yChange;
+	xChange = (mouseX - controls->prevMouseX) * controls->mouseSensitivity;
+	yChange = (mouseY - controls->prevMouseY) * controls->mouseSensitivity;
+	controls->yaw += xChange;
+	controls->pitch += yChange;
+	if (controls->pitch > 89) {
+		controls->pitch = 89;
+	}
+	if (controls->pitch < -89) {
+		controls->pitch = -89;
+	}
+
+	//Remember previous mouse position
+	controls->prevMouseX = mouseX;
+	controls->prevMouseY = mouseY;
+
+	float yawRad = controls->yaw * 3.1415926535 / 180;
+	float pitchRad = controls->pitch * 3.1415926535 / 180;
+	ew::Vec3 forward = ew::Vec3(sin(yawRad) * cos(pitchRad), sin(pitchRad), -1 * cos(yawRad) * cos(pitchRad));
+	camera->target = camera->position + forward;
+	camTarget[0] = camera->target.x;
+	camTarget[1] = camera->target.y;
+	camTarget[2] = camera->target.z;
+}
 
 int main() {
 	printf("Initializing...");
@@ -66,6 +112,7 @@ int main() {
 	ew::Shader shader("assets/vertexShader.vert", "assets/fragmentShader.frag");
 	artLib::Camera cam;
 	artLib::CameraControls camCon;
+	cam.target = ew::Vec3(camTarget[0], camTarget[1], camTarget[2]);
 	
 	//Cube mesh
 	ew::Mesh cubeMesh(ew::createCube(0.5f));
@@ -79,7 +126,6 @@ int main() {
 
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
-		moveCamera(window, &cam, &camCon);
 		glClearColor(0.3f, 0.4f, 0.9f, 1.0f);
 		//Clear both color buffer AND depth buffer
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -87,32 +133,15 @@ int main() {
 		//Set uniforms
 		shader.use();
 		cam.position = ew::Vec3(camPos[0], camPos[1], camPos[2]);
-		cam.target = ew::Vec3(camTarget[0], camTarget[1], camTarget[2]);
 		cam.fov = camFOV;
-		cam.aspectRatio = ((float)SCREEN_WIDTH / SCREEN_HEIGHT);
+		cam.aspectRatio = ((float)SCREEN_WIDTH / (float)SCREEN_HEIGHT);
 		cam.orthoSize = camOrthSize;
 		cam.nearPlane = camNear;
 		cam.farPlane = camFar;
 		cam.orthographic = camProject;
 		ew::Mat4 view = cam.ViewMatrix();
 		ew::Mat4 projection = cam.ProjectionMatrix();
-		float posMag = ew::Magnitude(cam.position - cam.target);
-		float targetMag = ew::Magnitude(ew::Cross((ew::Vec3)(0, 1, 0), ((cam.position - cam.target) / posMag)));
-		shader.setVec3("_Position", camPos[0], camPos[1], camPos[2]);
-		shader.setVec3("_Target", camTarget[0], camTarget[1], camTarget[2]);
-		shader.setFloat("_FirstMag", posMag);
-		shader.setFloat("_SecondMag", targetMag);
-		shader.setFloat("_FOV", camFOV);
-		shader.setFloat("_Aspect", cam.aspectRatio);
-		shader.setFloat("_Ortho", camOrthSize);
-		shader.setFloat("_Near", camNear);
-		shader.setFloat("_Far", camFar);
-		if (camProject) {
-			shader.setInt("_Project", 1);
-		}
-		else {
-			shader.setInt("_Project", 0);
-		}
+		moveCamera(window, &cam, &camCon);
 
 		//TODO: Set model matrix uniform
 		shader.setMat4("_View", view);
@@ -164,8 +193,4 @@ int main() {
 void framebufferSizeCallback(GLFWwindow* window, int width, int height)
 {
 	glViewport(0, 0, width, height);
-}
-
-void moveCamera(GLFWwindow* window, artLib::Camera* camera, artLib::CameraControls* controls) {
-
 }

@@ -94,7 +94,7 @@ namespace artLib {
 		return projection;
 	};
 	inline ew::Mat4 Perspective(float fov, float aspect, float near, float far) {
-		float fovRad = 180 * fov / 3.1415926535;
+		float fovRad = 3.1415926535 * fov / 180;
 		float d = 1/(tan(fovRad / 2));
 		ew::Vec4 first((d / aspect), 0.0f, 0.0f, 0.0f);
 		ew::Vec4 second(0.0f, d, 0.0f, 0.0f);
