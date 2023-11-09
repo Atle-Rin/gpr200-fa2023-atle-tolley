@@ -26,6 +26,7 @@ namespace artLib {
 			vertex.pos.z = sin(angle) * radius;
 			vertex.pos.y = top;
 			vertex.normal = ew::Vec3(0, 1, 0);
+			vertex.uv = ew::Vec2((vertex.pos.x + 1) / 2, (vertex.pos.z + 1) / 2);
 			cylinder.vertices.push_back(vertex);
 		}
 		for (int i = 0; i <= numSegments; i++) {
@@ -35,6 +36,7 @@ namespace artLib {
 			vertex.pos.z = sin(angle) * radius;
 			vertex.pos.y = top;
 			vertex.normal = vertex.pos - topV.pos;
+			vertex.uv = ew::Vec2(((float)i / numSegments), vertex.pos.y);
 			cylinder.vertices.push_back(vertex);
 		}
 		ew::Vertex botV;
@@ -47,7 +49,8 @@ namespace artLib {
 			vertex.pos.x = cos(angle) * radius;
 			vertex.pos.z = sin(angle) * radius;
 			vertex.pos.y = bottom;
-			vertex.normal = vertex.pos - botV.pos;
+			vertex.normal = ew::Vec3(0, -1, 0);
+			vertex.uv = ew::Vec2((vertex.pos.x + 1) / 2, (vertex.pos.z + 1) / 2);
 			cylinder.vertices.push_back(vertex);
 		}
 		for (int i = 0; i <= numSegments; i++) {
@@ -56,7 +59,8 @@ namespace artLib {
 			vertex.pos.x = cos(angle) * radius;
 			vertex.pos.z = sin(angle) * radius;
 			vertex.pos.y = bottom;
-			vertex.normal = ew::Vec3(0, -1, 0);
+			vertex.normal = vertex.pos - botV.pos;
+			vertex.uv = ew::Vec2(((float)i / numSegments), vertex.pos.y);
 			cylinder.vertices.push_back(vertex);
 		}
 
@@ -70,17 +74,18 @@ namespace artLib {
 			cylinder.indices.push_back(start + i + 1);
 		}
 		for (int i = 0; i < numSegments; i++) {
-			cylinder.indices.push_back(botC);
-			cylinder.indices.push_back(start + i + botC);
-			cylinder.indices.push_back(start + i + botC + 1);
+			cylinder.indices.push_back(columns);
+			cylinder.indices.push_back(start + i + columns);
+			cylinder.indices.push_back(start + i + columns + 1);
 		}
+		columns += numSegments + 1;
 		for (int i = 0; i < numSegments; i++) {
 			cylinder.indices.push_back(start + i);
 			cylinder.indices.push_back(start + i + 1);
-			cylinder.indices.push_back(start + i + botC);
+			cylinder.indices.push_back(start + i + columns);
 			cylinder.indices.push_back(start + i + 1);
-			cylinder.indices.push_back(start + i + botC);
-			cylinder.indices.push_back(start + i + botC + 1);
+			cylinder.indices.push_back(start + i + columns);
+			cylinder.indices.push_back(start + i + columns + 1);
 		}
 
 		return cylinder;
