@@ -3,8 +3,41 @@
 namespace artLib {
 	ew::MeshData createSphere(float radius, int numSegments) {
 		ew::MeshData sphere;
+		float thetaStep = 3.14159265358979323 * 2;
+		thetaStep /= numSegments;
+		float phiStep = 3.14159265358979323 / numSegments;
+		for (int i = 0; i <= numSegments; i++) {
+			float phi = i * phiStep;
+			for (int j = 0; j <= numSegments; i++) {
+				float theta = j * thetaStep;
+				ew::Vertex vertex;
+				vertex.pos.x = radius * cos(theta) * sin(phi);
+				vertex.pos.y = radius * cos(phi);
+				vertex.pos.z = radius * sin(theta) * sin(phi);
+				vertex.uv = ew::Vec2(((vertex.pos.x + 1) / 2), ((vertex.pos.y + 1) / 2));
+				vertex.normal = ew::Normalize(vertex.pos);
+				sphere.vertices.push_back(vertex);
+			}
+		}
+
+		unsigned int poleStart = 0;
+		unsigned int sideStart = numSegments + 1;
 		for (int i = 0; i < numSegments; i++) {
-			sphere.vertices.push_back(ew::Vec3(i, i, i)); //placeholder. replace with actual vertex position calculations later
+			sphere.indices.push_back(poleStart + i);
+			sphere.indices.push_back(sideStart + i);
+			sphere.indices.push_back(sideStart + i + 1);
+		}
+		int columns = numSegments + 1;
+		for (int i = 1; i < numSegments - 1; i++) {
+			for (int j = 0; j < numSegments; j++) {
+				int start = i * j * columns;
+				sphere.indices.push_back(start);
+				sphere.indices.push_back(start + 1);
+				sphere.indices.push_back(start + columns);
+				sphere.indices.push_back(start + 1);
+				sphere.indices.push_back(start + columns);
+				sphere.indices.push_back(start + columns + 1);
+			}
 		}
 
 		return sphere;
