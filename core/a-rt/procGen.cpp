@@ -8,7 +8,7 @@ namespace artLib {
 		float phiStep = 3.14159265358979323 / numSegments;
 		for (int i = 0; i <= numSegments; i++) {
 			float phi = i * phiStep;
-			for (int j = 0; j <= numSegments; i++) {
+			for (int j = 0; j <= numSegments; j++) {
 				float theta = j * thetaStep;
 				ew::Vertex vertex;
 				vertex.pos.x = radius * cos(theta) * sin(phi);
