@@ -82,11 +82,11 @@ int main() {
 	//Create mesh data
 	ew::MeshData cubeMeshData = ew::createCube(0.5f);
 	ew::Mesh cubeMesh(cubeMeshData);
-	ew::MeshData sphereMeshData = artLib::createSphere(0.5f, 16);
+	ew::MeshData sphereMeshData = artLib::createSphere(0.5f, 64);
 	ew::Mesh sphereMesh(sphereMeshData);
-	ew::MeshData cylinderMeshData = artLib::createCylinder(5, 0.5f, 16);
+	ew::MeshData cylinderMeshData = artLib::createCylinder(2, 0.5f, 32);
 	ew::Mesh cylinderMesh(cylinderMeshData);
-	ew::MeshData planeMeshData = artLib::createPlane(10, 10, 5);
+	ew::MeshData planeMeshData = artLib::createPlane(5, 5, 5);
 	ew::Mesh planeMesh(planeMeshData);
 
 	//Initialize transform

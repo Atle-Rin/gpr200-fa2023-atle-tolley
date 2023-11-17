@@ -59,6 +59,7 @@ namespace artLib {
 		ew::Vertex topV;
 		topV.pos = ew::Vec3(0, top, 0);
 		topV.normal = ew::Vec3(0, 1, 0);
+		topV.uv = ew::Vec2(0.5f, 0.5f);
 		cylinder.vertices.push_back(topV);
 		float angleStep = (3.14159265358979323 * 2) / numSegments;
 		for (int i = 0; i <= numSegments; i++) {
@@ -78,13 +79,23 @@ namespace artLib {
 			vertex.pos.z = sin(angle) * radius;
 			vertex.pos.y = top;
 			vertex.normal = vertex.pos - topV.pos;
-			vertex.uv = ew::Vec2(((float)i / numSegments), vertex.pos.y);
+			vertex.uv = ew::Vec2(((float)i / numSegments), (vertex.pos.y + top) / radius);
 			cylinder.vertices.push_back(vertex);
 		}
 		ew::Vertex botV;
 		botV.pos = ew::Vec3(0, bottom, 0);
 		botV.normal = ew::Vec3(0, -1, 0);
-		cylinder.vertices.push_back(botV);
+		botV.uv = ew::Vec2(0.5f, 0.5f);
+		for (int i = 0; i <= numSegments; i++) {
+			float angle = i * angleStep;
+			ew::Vertex vertex;
+			vertex.pos.x = cos(angle) * radius;
+			vertex.pos.z = sin(angle) * radius;
+			vertex.pos.y = bottom;
+			vertex.normal = vertex.pos - botV.pos;
+			vertex.uv = ew::Vec2(((float)i / numSegments), (vertex.pos.y + top) / radius);
+			cylinder.vertices.push_back(vertex);
+		}
 		for (int i = 0; i <= numSegments; i++) {
 			float angle = i * angleStep;
 			ew::Vertex vertex;
@@ -95,39 +106,32 @@ namespace artLib {
 			vertex.uv = ew::Vec2((vertex.pos.x + 1) / 2, (vertex.pos.z + 1) / 2);
 			cylinder.vertices.push_back(vertex);
 		}
-		for (int i = 0; i <= numSegments; i++) {
-			float angle = i * angleStep;
-			ew::Vertex vertex;
-			vertex.pos.x = cos(angle) * radius;
-			vertex.pos.z = sin(angle) * radius;
-			vertex.pos.y = bottom;
-			vertex.normal = vertex.pos - botV.pos;
-			vertex.uv = ew::Vec2(((float)i / numSegments), vertex.pos.y);
-			cylinder.vertices.push_back(vertex);
-		}
+		cylinder.vertices.push_back(botV);
 
 		unsigned int topC = 0;
 		unsigned int start = 1;
-		unsigned int columns = numSegments + 1;
-		columns *= 2;
 		for (int i = 0; i < numSegments; i++) {
 			cylinder.indices.push_back(topC);
 			cylinder.indices.push_back(start + i);
 			cylinder.indices.push_back(start + i + 1);
 		}
-		for (int i = 0; i < numSegments; i++) {
-			cylinder.indices.push_back(columns);
-			cylinder.indices.push_back(start + i + columns);
-			cylinder.indices.push_back(start + i + columns + 1);
+		unsigned int columns = numSegments + 1;
+		for (int i = 0; i <= numSegments; i++) {
+			unsigned int sideStart = start + i + numSegments + 1;
+			cylinder.indices.push_back(sideStart);
+			cylinder.indices.push_back(sideStart + 1);
+			cylinder.indices.push_back(sideStart + columns);
+			cylinder.indices.push_back(sideStart + 1);
+			cylinder.indices.push_back(sideStart + columns);
+			cylinder.indices.push_back(sideStart + columns + 1);
 		}
-		columns += numSegments + 1;
+		unsigned int botC = cylinder.vertices.size();
+		botC -= 1;
+		unsigned int bStart = botC - 1;
 		for (int i = 0; i < numSegments; i++) {
-			cylinder.indices.push_back(start + i);
-			cylinder.indices.push_back(start + i + 1);
-			cylinder.indices.push_back(start + i + columns);
-			cylinder.indices.push_back(start + i + 1);
-			cylinder.indices.push_back(start + i + columns);
-			cylinder.indices.push_back(start + i + columns + 1);
+			cylinder.indices.push_back(botC);
+			cylinder.indices.push_back(bStart - i);
+			cylinder.indices.push_back(bStart - i - 1);
 		}
 
 		return cylinder;
