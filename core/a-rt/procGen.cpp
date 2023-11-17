@@ -30,7 +30,7 @@ namespace artLib {
 		int columns = numSegments + 1;
 		for (int i = 1; i < numSegments - 1; i++) {
 			for (int j = 0; j < numSegments; j++) {
-				int start = i * j * columns;
+				int start = i * columns + j;
 				sphere.indices.push_back(start);
 				sphere.indices.push_back(start + 1);
 				sphere.indices.push_back(start + columns);
@@ -38,6 +38,15 @@ namespace artLib {
 				sphere.indices.push_back(start + columns);
 				sphere.indices.push_back(start + columns + 1);
 			}
+		}
+		unsigned int botStart = sphere.vertices.size();
+		botStart -= 1;
+		unsigned int botSide = botStart - numSegments;
+		botSide -= 1;
+		for (int i = 0; i < numSegments; i++) {
+			sphere.indices.push_back(botStart - i);
+			sphere.indices.push_back(botSide - i);
+			sphere.indices.push_back(botSide - i - 1);
 		}
 
 		return sphere;
