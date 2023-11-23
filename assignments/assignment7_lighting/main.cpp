@@ -27,6 +27,18 @@ ew::Vec3 bgColor = ew::Vec3(0.1f);
 ew::Camera camera;
 ew::CameraController cameraController;
 
+struct Light {
+	ew::Vec3 position; //World space
+	ew::Vec3 color; //RGB
+};
+
+struct Material {
+	float ambientK; //Ambient coefficient (0-1)
+	float diffuseK; //Diffuse coefficient (0-1)
+	float specular; //Specular coefficient (0-1)
+	float shininess; //Shininess
+};
+
 int main() {
 	printf("Initializing...");
 	if (!glfwInit()) {
@@ -59,13 +71,21 @@ int main() {
 	glEnable(GL_DEPTH_TEST);
 
 	ew::Shader shader("assets/defaultLit.vert", "assets/defaultLit.frag");
+	ew::Shader lighter("assets/unLit.vert", "assets/unLit.frag");
 	unsigned int brickTexture = ew::loadTexture("assets/brick_color.jpg",GL_REPEAT,GL_LINEAR);
+	Light lights[4];
+	Material bricks;
+	bricks.ambientK = 0.1f;
+	bricks.diffuseK = 0.55f;
+	bricks.specular = 0.23f;
+	bricks.shininess = 0.36f;
 
 	//Create cube
 	ew::Mesh cubeMesh(ew::createCube(1.0f));
 	ew::Mesh planeMesh(ew::createPlane(5.0f, 5.0f, 10));
 	ew::Mesh sphereMesh(ew::createSphere(0.5f, 64));
 	ew::Mesh cylinderMesh(ew::createCylinder(0.5f, 1.0f, 32));
+	ew::Mesh lightMesh(ew::createSphere(0.1f, 16));
 
 	//Initialize transforms
 	ew::Transform cubeTransform;
@@ -75,6 +95,7 @@ int main() {
 	planeTransform.position = ew::Vec3(0, -1.0, 0);
 	sphereTransform.position = ew::Vec3(-1.5f, 0.0f, 0.0f);
 	cylinderTransform.position = ew::Vec3(1.5f, 0.0f, 0.0f);
+	ew::Transform lightTransform;
 
 	resetCamera(camera,cameraController);
 
@@ -84,6 +105,15 @@ int main() {
 		float time = (float)glfwGetTime();
 		float deltaTime = time - prevTime;
 		prevTime = time;
+
+		lights[0].position = ew::Vec3(1.5f, 1.0f, 1.5f);
+		lights[0].color = ew::Vec3(1.0f, 0.0f, 0.0f);
+		lights[1].position = ew::Vec3(1.5f, 1.0f, -1.5f);
+		lights[1].color = ew::Vec3(0.0f, 1.0f, 0.0f);
+		lights[2].position = ew::Vec3(-1.5f, 1.0f, 1.5f);
+		lights[2].color = ew::Vec3(0.0f, 0.0f, 1.0f);
+		lights[3].position = ew::Vec3(-1.5f, 1.0f, -1.5f);
+		lights[3].color = ew::Vec3(1.0f, 1.0f, 0.0f);
 
 		//Update camera
 		camera.aspectRatio = (float)SCREEN_WIDTH / SCREEN_HEIGHT;
@@ -97,6 +127,18 @@ int main() {
 		glBindTexture(GL_TEXTURE_2D, brickTexture);
 		shader.setInt("_Texture", 0);
 		shader.setMat4("_ViewProjection", camera.ProjectionMatrix() * camera.ViewMatrix());
+		shader.setVec3("_Lights[0].position", lights[0].position);
+		shader.setVec3("_Lights[0].color", lights[0].color);
+		shader.setVec3("_Lights[1].position", lights[1].position);
+		shader.setVec3("_Lights[1].color", lights[1].color);
+		shader.setVec3("_Lights[2].position", lights[2].position);
+		shader.setVec3("_Lights[2].color", lights[2].color);
+		shader.setVec3("_Lights[3].position", lights[3].position);
+		shader.setVec3("_Lights[3].color", lights[3].color);
+		shader.setFloat("_DiffuseK", bricks.diffuseK);
+		shader.setFloat("_AmbientK", bricks.ambientK);
+		shader.setFloat("_Specular", bricks.specular);
+		
 
 		//Draw shapes
 		shader.setMat4("_Model", cubeTransform.getModelMatrix());
@@ -111,7 +153,27 @@ int main() {
 		shader.setMat4("_Model", cylinderTransform.getModelMatrix());
 		cylinderMesh.draw();
 
-		//TODO: Render point lights
+		lighter.use();
+		lighter.setMat4("_ViewProjection", camera.ProjectionMatrix() * camera.ViewMatrix());
+		lightTransform.position = lights[0].position;
+		lighter.setMat4("_Model", lightTransform.getModelMatrix());
+		lighter.setVec3("_Color", lights[0].color);
+		lightMesh.draw();
+
+		lightTransform.position = lights[1].position;
+		shader.setMat4("_Model", lightTransform.getModelMatrix());
+		lighter.setVec3("_Color", lights[1].color);
+		lightMesh.draw();
+
+		lightTransform.position = lights[2].position;
+		shader.setMat4("_Model", lightTransform.getModelMatrix());
+		lighter.setVec3("_Color", lights[2].color);
+		lightMesh.draw();
+
+		lightTransform.position = lights[3].position;
+		shader.setMat4("_Model", lightTransform.getModelMatrix());
+		lighter.setVec3("_Color", lights[3].color);
+		lightMesh.draw();
 
 		//Render UI
 		{
