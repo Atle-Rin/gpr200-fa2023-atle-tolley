@@ -21,8 +21,27 @@ void resetCamera(ew::Camera& camera, ew::CameraController& cameraController);
 int SCREEN_WIDTH = 1080;
 int SCREEN_HEIGHT = 720;
 
+int numLights = 4;
+
+float ambientK = 0.5f;
+float diffuseK = 0.67f;
+float specular = 0.12f;
+float shininess = 224;
+
 float prevTime;
 ew::Vec3 bgColor = ew::Vec3(0.1f);
+ew::Vec3 lightPos[4] = {
+	ew::Vec3(1.5f, 1.0f, 1.5f),
+	ew::Vec3(1.5f, 1.0f, -1.5f),
+	ew::Vec3(-1.5f, 1.0f, 1.5f),
+	ew::Vec3(-1.5f, 1.0f, -1.5f)
+};
+ew::Vec3 lightCol[4] = {
+	ew::Vec3(1.0f, 0.0f, 0.0f),
+	ew::Vec3(0.0f, 1.0f, 0.0f),
+	ew::Vec3(0.0f, 0.0f, 1.0f),
+	ew::Vec3(1.0f, 1.0f, 0.0f)
+};
 
 ew::Camera camera;
 ew::CameraController cameraController;
@@ -75,10 +94,6 @@ int main() {
 	unsigned int brickTexture = ew::loadTexture("assets/brick_color.jpg",GL_REPEAT,GL_LINEAR);
 	Light lights[4];
 	Material bricks;
-	bricks.ambientK = 0.1f;
-	bricks.diffuseK = 0.55f;
-	bricks.specular = 0.23f;
-	bricks.shininess = 0.36f;
 
 	//Create cube
 	ew::Mesh cubeMesh(ew::createCube(1.0f));
@@ -106,14 +121,19 @@ int main() {
 		float deltaTime = time - prevTime;
 		prevTime = time;
 
-		lights[0].position = ew::Vec3(1.5f, 1.0f, 1.5f);
-		lights[0].color = ew::Vec3(1.0f, 0.0f, 0.0f);
-		lights[1].position = ew::Vec3(1.5f, 1.0f, -1.5f);
-		lights[1].color = ew::Vec3(0.0f, 1.0f, 0.0f);
-		lights[2].position = ew::Vec3(-1.5f, 1.0f, 1.5f);
-		lights[2].color = ew::Vec3(0.0f, 0.0f, 1.0f);
-		lights[3].position = ew::Vec3(-1.5f, 1.0f, -1.5f);
-		lights[3].color = ew::Vec3(1.0f, 1.0f, 0.0f);
+		lights[0].position = lightPos[0];
+		lights[0].color = lightCol[0];
+		lights[1].position = lightPos[1];
+		lights[1].color = lightCol[1];
+		lights[2].position = lightPos[2];
+		lights[2].color = lightCol[2];
+		lights[3].position = lightPos[3];
+		lights[3].color = lightCol[3];
+
+		bricks.ambientK = ambientK;
+		bricks.diffuseK = diffuseK;
+		bricks.specular = specular;
+		bricks.shininess = shininess;
 
 		//Update camera
 		camera.aspectRatio = (float)SCREEN_WIDTH / SCREEN_HEIGHT;
@@ -135,9 +155,12 @@ int main() {
 		shader.setVec3("_Lights[2].color", lights[2].color);
 		shader.setVec3("_Lights[3].position", lights[3].position);
 		shader.setVec3("_Lights[3].color", lights[3].color);
+		shader.setInt("_NumLights", numLights);
 		shader.setFloat("_DiffuseK", bricks.diffuseK);
 		shader.setFloat("_AmbientK", bricks.ambientK);
 		shader.setFloat("_Specular", bricks.specular);
+		shader.setFloat("_Shininess", bricks.shininess);
+		shader.setVec3("_CamPos", camera.position);
 		
 
 		//Draw shapes
@@ -155,25 +178,12 @@ int main() {
 
 		lighter.use();
 		lighter.setMat4("_ViewProjection", camera.ProjectionMatrix() * camera.ViewMatrix());
-		lightTransform.position = lights[0].position;
-		lighter.setMat4("_Model", lightTransform.getModelMatrix());
-		lighter.setVec3("_Color", lights[0].color);
-		lightMesh.draw();
-
-		lightTransform.position = lights[1].position;
-		shader.setMat4("_Model", lightTransform.getModelMatrix());
-		lighter.setVec3("_Color", lights[1].color);
-		lightMesh.draw();
-
-		lightTransform.position = lights[2].position;
-		shader.setMat4("_Model", lightTransform.getModelMatrix());
-		lighter.setVec3("_Color", lights[2].color);
-		lightMesh.draw();
-
-		lightTransform.position = lights[3].position;
-		shader.setMat4("_Model", lightTransform.getModelMatrix());
-		lighter.setVec3("_Color", lights[3].color);
-		lightMesh.draw();
+		for (int i = 0; i < numLights; i++) {
+			lightTransform.position = lights[i].position;
+			lighter.setVec3("_Color", lights[i].color);
+			lighter.setMat4("_Model", lightTransform.getModelMatrix());
+			lightMesh.draw();
+		}
 
 		//Render UI
 		{
@@ -199,6 +209,25 @@ int main() {
 				if (ImGui::Button("Reset")) {
 					resetCamera(camera, cameraController);
 				}
+			}
+
+			ImGui::SliderInt("NumLights", &numLights, 1, 4);
+
+			for (size_t i = 0; i < 4; i++)
+			{
+				ImGui::PushID(i);
+				if (ImGui::CollapsingHeader("Light")) {
+					ImGui::DragFloat3("Position", &lightPos[i].x, 0.05f);
+					ImGui::SliderFloat3("Color", &lightCol[i].x, 0.0f, 1.0f);
+				}
+				ImGui::PopID();
+			}
+
+			if (ImGui::CollapsingHeader("Material")) {
+				ImGui::SliderFloat("_AmbientK", &ambientK, 0.0f, 1.0f);
+				ImGui::SliderFloat("_DiffuseK", &diffuseK, 0.0f, 1.0f);
+				ImGui::SliderFloat("_Specular", &specular, 0.0f, 1.0f);
+				ImGui::SliderFloat("_Shininess", &shininess, 2.0f, 255.0f);
 			}
 
 			ImGui::ColorEdit3("BG color", &bgColor.x);
